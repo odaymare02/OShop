@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using OShop.API.Data;
+using OShop.API.Services.Brands;
+using OShop.API.Services.Categories;
+using OShop.API.Services.Products;
 using Scalar.AspNetCore;
 
 namespace OShop.API
@@ -18,6 +21,9 @@ namespace OShop.API
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection")));//create this object 
+            builder.Services.AddScoped<ICategoryServices, CategoryServices>();
+            builder.Services.AddScoped<IBrandService, BrandsService>();
+            builder.Services.AddScoped<IProductsServices, ProductsServices>();
 
             var app = builder.Build();
 
