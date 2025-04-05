@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OShop.API.Data;
 
@@ -10,9 +11,11 @@ using OShop.API.Data;
 namespace OShop.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250329122523_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,9 +80,6 @@ namespace OShop.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BrandId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -112,8 +112,6 @@ namespace OShop.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CategoryId");
 
                     b.ToTable("products");
@@ -121,24 +119,13 @@ namespace OShop.API.Migrations
 
             modelBuilder.Entity("OShop.API.Models.Product", b =>
                 {
-                    b.HasOne("OShop.API.Models.Brand", "brand")
-                        .WithMany("products")
-                        .HasForeignKey("BrandId");
-
                     b.HasOne("OShop.API.Models.Category", "category")
                         .WithMany("products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("brand");
-
                     b.Navigation("category");
-                });
-
-            modelBuilder.Entity("OShop.API.Models.Brand", b =>
-                {
-                    b.Navigation("products");
                 });
 
             modelBuilder.Entity("OShop.API.Models.Category", b =>
