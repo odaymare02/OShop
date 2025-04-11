@@ -14,9 +14,9 @@ namespace OShop.API.Controllers
     {
         private readonly IProductsServices _productsServices = productsServices;
         [HttpGet("")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery]string? query, [FromQuery] int page, [FromQuery]int limit=10)
         {
-            var product= _productsServices.GetAll();
+            var product= _productsServices.GetAll(query,page,limit);
             return Ok(product.Adapt<IEnumerable<ProductResponse>>());
         }
         [HttpGet("{id}")]
@@ -40,9 +40,9 @@ namespace OShop.API.Controllers
             return result == false ? NotFound() : NoContent();
         }
         [HttpPut("{id}")]
-        public IActionResult update([FromRoute]int id, [FromForm]ProductRequest productRequest)
+        public IActionResult update([FromRoute]int id, [FromForm]ProductUpdateRequest productRequest)
         {
-            bool result = _productsServices.Edit(id, productRequest.Adapt<Product>());
+            bool result = _productsServices.Edit(id, productRequest);
             if (!result)
             {
                 return NotFound();

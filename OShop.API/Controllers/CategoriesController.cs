@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,8 @@ namespace OShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]//this provid automatically line to check if the parameters that i put the data anotaion on it is valid or not (if(!ModelState.isvalid)return validationProblem((ModelSatate)))
+    [Authorize]
+
     public class CategoriesController(ICategoryServices categoryServices) : ControllerBase
     {
        private readonly ICategoryServices _categoryServices=categoryServices;

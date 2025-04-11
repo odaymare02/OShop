@@ -1,6 +1,8 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OShop.API.Data;
+using OShop.API.Models;
 using OShop.API.Services.Brands;
 using OShop.API.Services.Categories;
 using OShop.API.Services.Products;
@@ -24,6 +26,12 @@ namespace OShop.API
             builder.Services.AddScoped<ICategoryServices, CategoryServices>();
             builder.Services.AddScoped<IBrandService, BrandsService>();
             builder.Services.AddScoped<IProductsServices, ProductsServices>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = false;
+            })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();//this bove code to sign any one of application user cuz need usermanager and signin manager and many others 
 
             var app = builder.Build();
 
