@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using OShop.API.Data;
 using OShop.API.DTOs.Requests;
 using OShop.API.DTOs.Responses;
@@ -21,7 +22,7 @@ namespace OShop.API.Services.Products
 
                 using (var fileStream = new FileStream(imgPath, FileMode.Create))
                 {
-                    img.CopyTo(fileStream);
+                    img.CopyToAsync(fileStream);
                 }
                 product.MainImage = imgName;    
                 _context.products.Add(product);
@@ -32,37 +33,61 @@ namespace OShop.API.Services.Products
             return null;
         }
 
-        public bool Edit(int id, Product product)
+        public bool Edit(int id, ProductUpdateRequest request)
         {
-            Product prod = _context.products.Find(id);
-            prod.Adapt<ProductRequest>();
-            var imgEdit = product.Adapt<ProductRequest>().MainImage;
-            if (imgEdit != null && imgEdit.Length > 0)
+            Product prodInDb = _context.products.AsNoTracking().FirstOrDefault(p=>p.Id==id);
+            var product = request.Adapt<Product>();
+            var imgEdit = request.MainImage;
+            
+           
+            if (prodInDb != null)
             {
-                var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "images", prod.MainImage);
-                if (System.IO.File.Exists(oldImgPath))
+                if (imgEdit != null && imgEdit.Length > 0)
                 {
-                    File.Delete(oldImgPath);
+                    var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "images", prodInDb.MainImage);
+                    if (File.Exists(oldImgPath))
+                    {
+                        File.Delete(oldImgPath);
+                    }
+                    var newImgName = Guid.NewGuid().ToString() + Path.GetExtension(imgEdit.FileName);
+                    var newImgPath = Path.Combine(Directory.GetCurrentDirectory(), "images", newImgName);
+                    using (var stream = System.IO.File.Create(newImgPath))
+                    {
+                        imgEdit.CopyToAsync(stream);
+                    }
+                    product.MainImage = newImgName;
                 }
-                var newImgName = Guid.NewGuid().ToString() + Path.GetExtension(imgEdit.FileName);
-                var newImgPath = Path.Combine(Directory.GetCurrentDirectory() , "images", newImgName);
-                using(var stream = System.IO.File.Create(newImgPath))
+                else//don't need to edit the image
                 {
-                    imgEdit.CopyTo(stream);
+                    product.MainImage = prodInDb.MainImage;
                 }
-                prod.MainImage = newImgName;
+                product.Id = id;
+                _context.products.Update(product);
+                _context.SaveChanges();
+                return true;
             }
-            prod.Name = product.Name;
-            return true;
+            return false;
         }
         public Product Get(Expression<Func<Product, bool>> expression)
         {
             return _context.products.FirstOrDefault(expression);
         }
 
-        public IEnumerable<Product> GetAll()
+        public IEnumerable<Product> GetAll(string query,int page,int limit)
         {
-            return _context.products.ToList();
+            IQueryable<Product> products = _context.products;//جبلي ياهن على مستوى السيرفر انا بفلتر بعدها حطهن عندي
+            if (page <= 0 || limit < 0)
+            {
+                page = 1;
+                limit = 10;
+            }
+            if (query != null)//serach about some product
+            {
+                products = products.Where(p => p.Name.Contains(query) || p.Description.Contains(query));
+            }//return all product with same name now i will do pagination
+            products = products.Skip((page - 1) * limit).Take(limit);
+            return products;
+
         }
 
         public bool Remove(int id)
