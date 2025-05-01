@@ -9,8 +9,14 @@ namespace OShop.API.Data
     {
        public ApplicationDbContext(DbContextOptions<ApplicationDbContext>options):base(options)
         { }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            //builder.Entity<Cart>().HasKey(e => new { e.ProductId, e.ApplicationUser });
+            base.OnModelCreating(builder);
+        }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> products { get; set; }
         public DbSet<Brand> brands { get; set; }
+        public DbSet<Cart> carts { get; set; }
     }
 }

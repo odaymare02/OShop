@@ -1,60 +1,69 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OShop.API.Data;
+using OShop.API.Migrations;
 using OShop.API.Models;
+using OShop.API.Services.IService;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace OShop.API.Services.Brands
 {
-    public class BrandsService : IBrandService
+    public class BrandsService:Service<Brand>,IBrandService 
     {
         ApplicationDbContext _context;
-        public BrandsService(ApplicationDbContext _context)
+        public BrandsService(ApplicationDbContext context):base(context)
         {
-            this._context = _context;
-        }
-        public Brand Add(Brand brand)
-        {
-            _context.brands.Add(brand);
-            _context.SaveChanges();
-            return brand;
+            _context = context;
         }
 
-        public bool Edit(int id, Brand brand)
+        public async Task<bool> EditAsync(int id, Brand brand, CancellationToken cancellationToken=default)
         {
-            Brand? brandInDb = _context.brands.AsNoTracking().FirstOrDefault(b => b.Id == id);
+            Brand? BrandInDb =  await _context.brands.FindAsync(id);
+            if (BrandInDb == null) return false;
+            BrandInDb.Id = id;
+            BrandInDb.Name = brand.Name;
+            BrandInDb.Description = brand.Description;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> UpdateStatus(int id, CancellationToken cancellationToken)
+        {
+            Brand? brandInDb =await _context.brands.FindAsync(id);
             if (brandInDb == null)
             {
                 return false;
             }
-            brand.Id = id;
-            _context.brands.Update(brand);
-            _context.SaveChanges();
+            brandInDb.Status = !brandInDb.Status;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
+        /*
+public async Task<bool> EditAsync(int id, Brand brand,CancellationToken cancellationToken)
+{
+   Brand? brandInDb = _context.brands.Find(id);
+   if (brandInDb == null)
+   {
+       return false;
+   }
+   brand.Id = id;
+   brandInDb.Name = brand.Name;
+   brandInDb.Descrition = brand.Descrition;
+  await _context.SaveChangesAsync(cancellationToken);
+   return true;
+}
 
-        public Brand Get(Expression<Func<Brand, bool>> expression)
-        {
-            Brand ?brand = _context.brands.FirstOrDefault(expression);
-            return brand;
-        }
-
-        public IEnumerable<Brand> getAll()
-        {
-            return _context.brands.ToList();
-        }
-
-        public bool Remove(int id)
-        {
-            Brand? BrandInDb = _context.brands.Find(id);
-            if (BrandInDb == null)
-            {
-                return false;
-            }
-            _context.brands.Remove(BrandInDb);
-            _context.SaveChanges();
-            return true;
-        }
-
-       
+public async Task<bool> UpdateStatus(int id, CancellationToken cancellationToken)
+{
+   Brand? brandInDb = _context.brands.Find(id);
+   if (brandInDb == null)
+   {
+       return false;
+   }
+   brandInDb.Status = !brandInDb.Status;
+   await _context.SaveChangesAsync(cancellationToken);
+   return true;
+}
+*/
     }
 }
