@@ -6,43 +6,48 @@ using OShop.API.DTOs.Requests;
 using OShop.API.DTOs.Responses;
 using OShop.API.Models;
 using OShop.API.Services.Brands;
+using OShop.API.Utality;
+using System.Threading.Tasks;
 
 namespace OShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles =$"{StaticData.SuperAdmin},{StaticData.Admin},{StaticData.Company}")]
     public class BrandsController(IBrandService brandService) : ControllerBase
     {
         private readonly IBrandService _brandService = brandService;
         [HttpGet("")]
-        public IActionResult GetAll()
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll()
         {
-            var Brands = _brandService.getAll();
+            var Brands = await _brandService.GetAsync();
             return Ok(Brands.Adapt<IEnumerable<BrandResponse>>());
         }
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute]int id)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById([FromRoute]int id)
         {
-            var brand = _brandService.Get(b => b.Id == id);
+            var brand = await _brandService.GetOne(b => b.Id == id);
             return brand==null ? NotFound() : Ok(brand.Adapt<BrandResponse>());
         }
         [HttpPost("")]
-        public IActionResult CreateBrand([FromBody]BrandRequest brand)
+        public async Task<IActionResult> CreateBrand([FromBody]BrandRequest brand)
         {
-            var brandinDb = _brandService.Add(brand.Adapt<Brand>());
-            return CreatedAtAction("GetById",new { brandinDb.Id},brandinDb);
+            var brandinDb =await _brandService.AddAsync(brand.Adapt<Brand>());
+            return CreatedAtAction("GetById",new { brandinDb.Id},brandinDb.Adapt<BrandResponse>());
         }
         [HttpPut("{id}")]
-        public IActionResult update([FromRoute]int id,[FromBody]BrandRequest brandReq)
+        public async Task<IActionResult> update([FromRoute]int id,[FromBody]BrandRequest brandReq,CancellationToken cancellationToken)
         {
-            bool progress = _brandService.Edit(id, brandReq.Adapt<Brand>());
+            bool progress = await _brandService.EditAsync(id, brandReq.Adapt<Brand>(),cancellationToken);
             if (progress == false) return NotFound();
             return NoContent();
         }
         [HttpDelete("{id}")]
-        public IActionResult delete([FromRoute]int id)
+        public async Task<IActionResult> delete([FromRoute]int id,CancellationToken cancellationToken)
         {
-            return _brandService.Remove(id) == false ? NotFound() : NoContent();
+            return await _brandService.RemoveAsync(id,cancellationToken) == false ? NotFound() : NoContent();
         }
         
     }

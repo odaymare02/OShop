@@ -8,7 +8,7 @@ namespace OShop.API.Services.Products
     {
         IEnumerable<Product> GetAll(string qyery,int page,int limit);
         Product Get(Expression<Func<Product, bool>> expression);
-        Product Add(Product product);
+        Product Add(ProductRequest product);
         bool Edit(int id, ProductUpdateRequest product);
         bool Remove(int id);
     }

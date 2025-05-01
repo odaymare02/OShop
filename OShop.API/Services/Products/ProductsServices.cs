@@ -12,25 +12,25 @@ namespace OShop.API.Services.Products
     public class ProductsServices(ApplicationDbContext context) : IProductsServices
     {
         private readonly ApplicationDbContext _context = context;
-        public Product Add(Product product)
+        public Product Add(ProductRequest Request)
         {
-            var img = product.Adapt<ProductRequest>().MainImage;
+            var img = Request.MainImage;
+            string imgName=null;
             if (img != null && img.Length > 0)
             {
-                var imgName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                 imgName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
                 var imgPath = Path.Combine(Directory.GetCurrentDirectory(), "images", imgName);
 
                 using (var fileStream = new FileStream(imgPath, FileMode.Create))
                 {
                     img.CopyToAsync(fileStream);
                 }
+            }
+                var product = Request.Adapt<Product>();
                 product.MainImage = imgName;    
                 _context.products.Add(product);
                 _context.SaveChanges();
                 return product;
-            }
-
-            return null;
         }
 
         public bool Edit(int id, ProductUpdateRequest request)

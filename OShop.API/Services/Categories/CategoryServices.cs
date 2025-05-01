@@ -1,51 +1,38 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OShop.API.Data;
 using OShop.API.Models;
+using OShop.API.Services.IService;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace OShop.API.Services.Categories
 {
-    public class CategoryServices : ICategoryServices
+    public class CategoryServices : Service<Category>,ICategoryServices
     {
         ApplicationDbContext _context;
-        public CategoryServices(ApplicationDbContext _context)
+        public CategoryServices(ApplicationDbContext context):base(context)//by default the class that i inhirete from it this constructore call the default constructor of the parent but the default constructor deleted cuz i make another constructore i should call the nother constructore 
         {
-            this._context = _context;
+            this._context = context;
         }
-        public Category Add(Category category)
-        {
-            _context.Categories.Add(category);
-            _context.SaveChanges();
-            return category;
-        }
+     
 
-        public bool Edit(int id, Category category)
+        public async Task<bool> EditAsync(int id, Category category,CancellationToken cancellationToken=default)
         {
-            Category? CategoryInDb = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
+            Category? CategoryInDb = _context.Categories.Find(id);
             if (CategoryInDb == null) return false;
-            category.Id = id;
-            _context.Categories.Update(category);
-            _context.SaveChanges();
+            CategoryInDb.Name = category.Name;
+            CategoryInDb.Description = category.Description;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
-
-        public Category?/*to allow return nullable value*/ Get(Expression<Func<Category, bool>> expression)
+        public async Task<bool> UpdateStatusAsync(int id,CancellationToken cancellationToken)
         {
-            return _context.Categories.FirstOrDefault(expression);
-        }
-
-        public IEnumerable<Category> GetAll()
-        {
-            return _context.Categories.ToList();
-        }
-
-        public bool Remove(int id)
-        {
-            Category? categoryInDb = _context.Categories.Find(id);
-            if (categoryInDb == null) return false;
-            _context.Remove(categoryInDb);
-            _context.SaveChanges();
+            var catInDb = _context.Categories.Find(id);
+            if (catInDb == null) return false;
+            catInDb.Status = !catInDb.Status;
+           await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
+   
     }
 }
