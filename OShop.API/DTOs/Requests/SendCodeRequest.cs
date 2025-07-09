@@ -2,11 +2,12 @@
 
 namespace OShop.API.DTOs.Requests
 {
-    public class LoginRequest
+    public class SendCodeRequest
     {
-        [EmailAddress]
         public string Email { get; set; }
+        public string Code { get; set; }
         public string Password { get; set; }
-        public bool RememberMe { get; set; }
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; }
     }
 }

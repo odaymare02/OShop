@@ -16,7 +16,7 @@ namespace OShop.API.Utality.email
             };
 
             return client.SendMailAsync(
-                new MailMessage(from: "mareoday123@gmail.com",
+                new MailMessage(from: "OShope@shope.com",
                                 to: email,
                                 subject,
                                 message
@@ -29,3 +29,4 @@ namespace OShop.API.Utality.email
     
     }
 }
+

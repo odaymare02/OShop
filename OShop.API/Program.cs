@@ -1,4 +1,5 @@
 
+using Mapster;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,15 +10,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OShop.API.Data;
+using OShop.API.DTOs.Responses;
 using OShop.API.Models;
 using OShop.API.Services.Brands;
 using OShop.API.Services.Carts;
 using OShop.API.Services.Categories;
+using OShop.API.Services.order;
+using OShop.API.Services.OrderItemServic;
+using OShop.API.Services.PasswordReset;
 using OShop.API.Services.Products;
+using OShop.API.Services.REviews;
 using OShop.API.Services.Users;
+
+using OShop.API.Utality;
 using OShop.API.Utality.DBinit;
 using OShop.API.Utality.email;
 using Scalar.AspNetCore;
+using Stripe;
 using System.Text;
 
 namespace OShop.API
@@ -41,10 +50,12 @@ namespace OShop.API
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
-                                  policy =>
-                                  {
-                                      policy.AllowAnyOrigin();//any one have this api can access to endpoints
-                                  });
+                               policy =>
+                               {
+                                   policy.WithOrigins("http://localhost:5173") // Õœœ «·„Êﬁ⁄ «·„”„ÊÕ
+                                         .AllowAnyMethod()
+                                         .AllowAnyHeader(); // „Â„ Ãœ« Õ Ï  ”„Õ »‹ Content-Type
+                               });
             });
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection")));//create this object 
             builder.Services.AddScoped<ICategoryServices, CategoryServices>();
@@ -53,11 +64,22 @@ namespace OShop.API
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+            builder.Services.AddScoped<IReviewService, Services.REviews.ReviewService>();
+
+            builder.Services.AddScoped<IPassResetCode,OShop.API.Services.PasswordReset. PassResetCode>();
+            
+
+
 
             builder.Services.AddScoped<IDBinitilizer, DBinitilizer>();
+            TypeAdapterConfig<Models.Review, ReviewResponse>.NewConfig()
+               .Map(dest => dest.UserName, src => src.ApplicationUser.UserName);
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = false;
+                options.SignIn.RequireConfirmedEmail = true;
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();//this bove code to sign any one of application user cuz need usermanager and signin manager and many others 
@@ -80,6 +102,9 @@ namespace OShop.API
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lYlc929meK4cIhLGJfzE0zDWr65UrEi0")),//to check the signuare(the token that generate using this siginture only the token who provide it that mean if i use the same signtuare in another project maybe accure conflict when use the end point )
                     };
                 });
+            //to get secret key auto
+            builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("Stripe"));
+            StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

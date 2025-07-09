@@ -30,7 +30,7 @@ namespace OShop.API.Utality.DBinit
             {
                 Console.WriteLine(ex.Message);
             }
-            if (roleManager.Roles is not null)
+            if (!await roleManager.RoleExistsAsync(StaticData.SuperAdmin))
             {
                 await roleManager.CreateAsync(new(StaticData.SuperAdmin));
                 await roleManager.CreateAsync(new(StaticData.Admin));
@@ -47,9 +47,10 @@ namespace OShop.API.Utality.DBinit
 
                 }, "SuperAdmin@1");//creat superAdmin direct when upload the project or run
                 var user = await userManager.FindByEmailAsync("SuperAdmin@oshop.com");
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                await userManager.ConfirmEmailAsync(user,token);
                 await userManager.AddToRoleAsync(user, StaticData.SuperAdmin);
             }
-           
         }
     }
 }

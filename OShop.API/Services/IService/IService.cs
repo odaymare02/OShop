@@ -16,6 +16,6 @@ namespace OShop.API.Services.IService
         Task<T>? GetOne(Expression<Func<T,bool>> expression, Expression<Func<T, object>>?[]includes=null,bool isTracked=true );
         Task<T> AddAsync(T entity, CancellationToken cancellation = default);
         Task<bool> RemoveAsync(int id, CancellationToken cancellationToken = default);
-
+        Task<int> CommitAsync(CancellationToken cancellationToken = default);
     }
 }

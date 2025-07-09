@@ -26,7 +26,6 @@ namespace OShop.API.Controllers
         [HttpGet("")]
         public async Task<IActionResult> GetAll()
         {
-
             var users = await userService.GetAsync();
            return Ok(users.Adapt<IEnumerable<UserDto>>()); 
         }
@@ -41,6 +40,19 @@ namespace OShop.API.Controllers
         {
             var res =await userService.ChangeRole(userId, newRole);
             return Ok(res);
+        }
+        [HttpPut("LockUnlock/{userId}")]
+        public async Task<IActionResult> LockUnlock(string userId)
+        {
+            var result = await userService.LockUnlock(userId);
+            if (result.Success) return Ok(
+                new
+                {
+                    result.Message,
+                    result.IsLocked
+                }
+                );
+            else return NotFound(new {result.Message});
         }
     }
 }

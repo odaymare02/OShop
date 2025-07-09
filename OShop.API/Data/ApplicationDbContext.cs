@@ -18,5 +18,11 @@ namespace OShop.API.Data
         public DbSet<Product> products { get; set; }
         public DbSet<Brand> brands { get; set; }
         public DbSet<Cart> carts { get; set; }
+        public DbSet<Order> orders { get; set; }
+        public DbSet<OrderItem> orderItems { get; set; }
+        public DbSet<PassResetCode> passResetCodes { get; set; }
+        public DbSet<Review> reviews { get; set; }
+        public DbSet<ReviewImages> reviewImages { get; set; }
+
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OShop.API.Data;
 
@@ -11,9 +12,11 @@ using OShop.API.Data;
 namespace OShop.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250510121942_order")]
+    partial class order
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -376,32 +379,6 @@ namespace OShop.API.Migrations
                     b.ToTable("orderItems");
                 });
 
-            modelBuilder.Entity("OShop.API.Models.PassResetCode", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("ExpirationCode")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("passResetCodes");
-                });
-
             modelBuilder.Entity("OShop.API.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -450,61 +427,6 @@ namespace OShop.API.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("products");
-                });
-
-            modelBuilder.Entity("OShop.API.Models.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Commnet")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rate")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("reviews");
-                });
-
-            modelBuilder.Entity("OShop.API.Models.ReviewImages", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("reviewImages");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -607,17 +529,6 @@ namespace OShop.API.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("OShop.API.Models.PassResetCode", b =>
-                {
-                    b.HasOne("OShop.API.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-                });
-
             modelBuilder.Entity("OShop.API.Models.Product", b =>
                 {
                     b.HasOne("OShop.API.Models.Brand", "brand")
@@ -633,36 +544,6 @@ namespace OShop.API.Migrations
                     b.Navigation("category");
                 });
 
-            modelBuilder.Entity("OShop.API.Models.Review", b =>
-                {
-                    b.HasOne("OShop.API.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OShop.API.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("OShop.API.Models.ReviewImages", b =>
-                {
-                    b.HasOne("OShop.API.Models.Review", "Review")
-                        .WithMany("ReviewImages")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-                });
-
             modelBuilder.Entity("OShop.API.Models.Brand", b =>
                 {
                     b.Navigation("products");
@@ -671,11 +552,6 @@ namespace OShop.API.Migrations
             modelBuilder.Entity("OShop.API.Models.Category", b =>
                 {
                     b.Navigation("products");
-                });
-
-            modelBuilder.Entity("OShop.API.Models.Review", b =>
-                {
-                    b.Navigation("ReviewImages");
                 });
 #pragma warning restore 612, 618
         }
